@@ -175,6 +175,23 @@ weighters:
       anchor_batch_size: 8  # 计算句向量时的前向 batch 大小
       clip: null            # 可选权重上限，防梯度爆炸
 
+  embedding_diverse:
+    name: embedding_diverse
+    params:
+      # 求解 max_w  s^T w - (beta / 2) w^T S w + tau * H(w)
+      # S 为归一化 embedding 的余弦 Gram 矩阵，s_i = <u, z_i> 为对 anchor 均值 u 的对齐度
+      beta: 0.1               # 交互/冗余强度
+      tau: 0.05               # 熵温度（需 > 0），越小权重越锐利
+      fixed_point_iters: 5    # 阻尼定点迭代次数
+      damping: 1.0            # 阻尼系数 rho ∈ (0, 1]，1.0 表示不阻尼
+      target_update_step: 50  # 每多少步用 eval 集刷新一次目标向量
+      target_batch_size: 1    # 计算目标向量时的前向 batch 大小
+      embed_normalize: true   # 是否对 embedding 做 L2 归一化
+      pooling: last_token     # 句向量池化方式：last_token / mean_pool
+      embed_layer: -1         # 取哪一层 hidden state，-1 为最后一层
+      objective_mode: full    # full / align_only / diverse_only / uniform
+      seed: 42
+
   custom:
     name: custom
     params:
