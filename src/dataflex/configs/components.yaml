@@ -175,8 +175,8 @@ weighters:
       anchor_batch_size: 8  # 计算句向量时的前向 batch 大小
       clip: null            # 可选权重上限，防梯度爆炸
 
-  embedding_diverse:
-    name: embedding_diverse
+  joint_update_aware:
+    name: joint_update_aware
     params:
       # 求解 max_w  s^T w - (beta / 2) w^T S w + tau * H(w)
       # S 为归一化 embedding 的余弦 Gram 矩阵，s_i = <u, z_i> 为对 anchor 均值 u 的对齐度

@@ -12,12 +12,11 @@ from dataflex.utils.logging import logger
 from .base_weighter import Weighter
 
 
-@register_weighter("embedding_diverse")
-class EmbeddingDiverseWeighter(Weighter):
+@register_weighter("joint_update_aware")
+class JointUpdateAwareWeighter(Weighter):
     """
-    参考论文
-    Joint Update-Aware Reweighting for LLM Fine-Tuning
-    以样本 embedding 之间的交互（冗余）作为代理，在单纯形上求解带熵正则的加权目标：
+    Joint-Update-Aware 数据加权：以样本 embedding 之间的交互（冗余）作为代理，
+    在单纯形上求解带熵正则的加权目标：
         max_w  s^T w - (beta / 2) w^T S w + tau * H(w)
     其中 S 是 L2 归一化 embedding 的余弦 Gram 矩阵，s_i = <u, z_i> 为样本对
     anchor(验证)集平均向量 u 的对齐度。唯一内部最优是定点 w = softmax([s - beta S w] / tau)，
@@ -81,7 +80,7 @@ class EmbeddingDiverseWeighter(Weighter):
         self._warned_eval_fallback = False
 
         logger.info(
-            "[Dataflex] EmbeddingDiverseWeighter initialized "
+            "[Dataflex] JointUpdateAwareWeighter initialized "
             f"(beta={self.beta}, tau={self.tau}, iters={self.fixed_point_iters}, "
             f"damping={self.damping}, pooling={self.pooling}, "
             f"embed_layer={self.embed_layer}, objective_mode={self.objective_mode})."
@@ -94,7 +93,7 @@ class EmbeddingDiverseWeighter(Weighter):
             if not eval_dataset:
                 return None
             first_key = next(iter(eval_dataset))
-            logger.info(f"[Dataflex] EmbeddingDiverseWeighter using eval_dataset['{first_key}'] as target data.")
+            logger.info(f"[Dataflex] JointUpdateAwareWeighter using eval_dataset['{first_key}'] as target data.")
             return eval_dataset[first_key]
         return eval_dataset
 
@@ -358,7 +357,7 @@ class EmbeddingDiverseWeighter(Weighter):
             local_weights = weights[start:end].to(device=device, dtype=losses.dtype)
 
         if ctx is not None and ctx.args.local_rank in [-1, 0]:
-            logger.info(f"[Dataflex] EmbeddingDiverse weights (first sample): {float(local_weights[0])}")
+            logger.info(f"[Dataflex] JointUpdateAware weights (first sample): {float(local_weights[0])}")
 
         # DDP 会对各卡梯度取平均，这里 × world_size 让全局加权目标的尺度与单机一致
         return torch.sum(local_weights * losses) * world_size

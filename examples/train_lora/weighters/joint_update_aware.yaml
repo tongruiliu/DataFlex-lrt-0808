@@ -21,7 +21,7 @@ dataloader_num_workers: 0
 seed: 42
 
 ### output
-output_dir: ../dataflex_saves/Llama-3.1-8B/embedding_diverse
+output_dir: ../dataflex_saves/Llama-3.1-8B/joint_update_aware
 logging_steps: 10
 save_steps: 100
 plot_loss: true
@@ -44,5 +44,5 @@ ddp_timeout: 180000000
 ### Dataflex args
 train_type: dynamic_weight
 components_cfg_file: src/dataflex/configs/components.yaml
-component_name: embedding_diverse
+component_name: joint_update_aware
 warmup_step: 100
